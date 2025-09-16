@@ -16,7 +16,7 @@ fn main() {
         .window_size((400.0, 400.0));
 
     let stateInit = HelloState{
-        name: "0".into(),
+        name: "Enter Your Name".into(),
     };
 
     AppLauncher::with_window(window)
@@ -25,7 +25,7 @@ fn main() {
 }
 
 fn  buildRootWidget() -> impl Widget<HelloState> {
-    let label = Label::new(|data : &HelloState, _env: &Env| format!("In binary: {}!", data.name));
+    let label = Label::new(|data : &HelloState, _env: &Env| format!("Hello, {}!", data.name));
 
     let textBox = TextBox::new()
         .with_placeholder("Welcome to Hyperion!")
