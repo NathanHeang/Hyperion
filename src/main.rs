@@ -1,8 +1,9 @@
 #![allow(non_snake_case)]
 #![windows_subsystem = "windows"]
 
-use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WindowDesc, WidgetExt};
-use druid::widget::{Align, Flex, Label, TextBox};
+use druid::widget::prelude::*;
+use druid::widget::{Align, Flex, Label, TextBox, Painter, WidgetExt};
+use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WindowDesc, Rect, Color};
 
 #[derive(Clone, Data, Lens)]
 struct HelloState {
@@ -15,7 +16,7 @@ fn main() {
         .window_size((400.0, 400.0));
 
     let stateInit = HelloState{
-        name: "World".into(),
+        name: "0".into(),
     };
 
     AppLauncher::with_window(window)
@@ -24,9 +25,9 @@ fn main() {
 }
 
 fn  buildRootWidget() -> impl Widget<HelloState> {
-    let label = Label::new(|data : &HelloState, _env: &Env| format!("Hello {}!", data.name));
+    let label = Label::new(|data : &HelloState, _env: &Env| format!("In binary: {}!", data.name));
 
-    let text_box = TextBox::new()
+    let textBox = TextBox::new()
         .with_placeholder("Welcome to Hyperion!")
         .fix_width(200.0)
         .lens(HelloState::name);
@@ -34,7 +35,7 @@ fn  buildRootWidget() -> impl Widget<HelloState> {
     let layout = Flex::column()
         .with_child(label)
         .with_spacer(10.0)
-        .with_child(text_box);
+        .with_child(textBox);
 
     Align::centered(layout)
 }
