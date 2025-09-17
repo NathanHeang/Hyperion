@@ -1,9 +1,10 @@
 #![allow(non_snake_case)]
-#![windows_subsystem = "windows"]
+//#![windows_subsystem = "windows"]
 
 use druid::widget::{Align, Button, Flex, Label, TextBox, WidgetExt};
 use druid::{AppLauncher, Data, Env, Lens, Widget, WindowDesc};
 use scraper::{Html, Selector};
+
 #[derive(Clone, Data, Lens)]
 struct ScraperState {
     url: String,
@@ -14,11 +15,11 @@ fn scrape(url: String, selector: String){
     let response = reqwest::blocking::get(
         url).unwrap().text().unwrap();
 
-    let doc_body = Html::parse_document(&response);
+    let doc = Html::parse_document(&response);
 
     let title = Selector::parse(&*selector).unwrap();
 
-    for title in doc_body.select(&title) {
+    for title in doc.select(&title) {
         let titles = title.text().collect::<Vec<_>>();
         println!("{}", titles[0])
     }
@@ -27,7 +28,8 @@ fn scrape(url: String, selector: String){
 fn main() {
     let window = WindowDesc::new(buildRootWidget())
         .title("Hyperion")
-        .window_size((400.0, 400.0));
+        .window_size((400.0, 400.0))
+        .set_always_on_top(true);
 
     let stateInit = ScraperState{
         url: "".into(),
