@@ -1,11 +1,12 @@
 #![allow(non_snake_case)]
 //#![windows_subsystem = "windows"]
 
-use druid::widget::{Align, Button, Flex, Label, TextBox, WidgetExt};
-use druid::{AppLauncher, Data, Env, Lens, Widget, WindowDesc};
+use xilem::view::{button, flex, label, textbox};
+use xilem::{EventLoop, WidgetView, Xilem};
+use winit::error::EventLoopError;
 use scraper::{Html, Selector};
 
-#[derive(Clone, Data, Lens)]
+#[derive(Default)]
 struct ScraperState {
     url: String,
     selector: String
@@ -25,45 +26,21 @@ fn scrape(url: String, selector: String){
     }
 }
 
-fn main() {
-    let window = WindowDesc::new(buildRootWidget())
-        .title("Hyperion")
-        .window_size((400.0, 400.0))
-        .set_always_on_top(true);
-
-    let stateInit = ScraperState{
-        url: "".into(),
-        selector: "".into()
-    };
-
-    AppLauncher::with_window(window)
-        .launch(stateInit)
-        .expect("Failed to initialize Hyperion");
+fn appLogic(data:&mut ScraperState) -> impl WidgetView<ScraperState> + use<>{
+    flex((
+            label(format!("Pasting scraped text into console from {} elements in {}", data.selector, data.url)),
+            textbox(data.url.clone(), |data: &mut ScraperState, url|{
+                data.url = url
+            }),
+            textbox(data.selector.clone(), |data: &mut ScraperState, selector|{
+                data.selector = selector
+            }),
+            button("Scrape", |data: &mut ScraperState| scrape(data.url.clone(), data.selector.clone())),
+        ))
 }
 
-fn  buildRootWidget() -> impl Widget<ScraperState> {
-    let label = Label::new(|data : &ScraperState, _env: &Env| format!("Pasting scraped text into console from {} elements in {}", data.selector, data.url));
-
-    let urlBox = TextBox::new()
-        .with_placeholder("URL")
-        .fix_width(200.0)
-        .lens(ScraperState::url);
-
-    let selectorBox = TextBox::new()
-        .with_placeholder("HTML Selector")
-        .fix_width(200.0)
-        .lens(ScraperState::selector);
-
-    let button = Button::new("Scrape")
-        .on_click(|_, data: &mut ScraperState, _env| {
-            scrape(data.url.clone(), data.selector.clone())
-        });
-
-    let layout = Flex::column()
-        .with_child(label)
-        .with_spacer(10.0)
-        .with_child(urlBox)
-        .with_child(selectorBox)
-        .with_child(button);
-    Align::centered(layout)
+fn main() -> Result<(), EventLoopError> {
+    let window = Xilem::new(ScraperState::default(), appLogic);
+    window.run_windowed(EventLoop::with_user_event(), "Hyperion".into())?;
+    Ok(())
 }
